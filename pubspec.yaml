@@ -28,9 +28,9 @@ dependencies:
   flutter_map: ^6.1.0
   latlong2: ^0.9.0
 
-  # 高德地图（必须两个包一起用）
+  # 高德地图（必须三个包一起）
   amap_flutter_map: ^3.0.0
-  amap_flutter_base: ^3.0.0     # ← 你缺的就是这个
+  amap_flutter_base: ^3.0.0      # ← 你缺的就是这个
   amap_flutter_location: ^3.0.0
 
   # 电量
