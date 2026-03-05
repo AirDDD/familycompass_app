@@ -1,7 +1,11 @@
+// lib/pages/family_page.dart
 import 'package:flutter/material.dart';
-import '../services/family_service.dart';
-import 'qr_generate_page.dart';
 import 'qr_scan_page.dart';
+import '../services/signal_service.dart';
+import '../services/webrtc_service.dart';
+import '../services/location_service.dart';
+import 'map_page.dart';
+import 'chat_page.dart';
 
 class FamilyPage extends StatefulWidget {
   const FamilyPage({super.key});
@@ -11,66 +15,73 @@ class FamilyPage extends StatefulWidget {
 }
 
 class _FamilyPageState extends State<FamilyPage> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _joinController = TextEditingController();
+  String? groupId;
+  String? signalUrl;
+  late SignalService signal;
+  WebRTCService? webrtc;
+  LocationService? locationService;
+
+  @override
+  void initState() {
+    super.initState();
+    signal = SignalService();
+  }
+
+  Future<void> _joinFamily() async {
+    final payload = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const QrScanPage()),
+    );
+
+    if (payload == null) return;
+
+    groupId = payload["groupId"];
+    signalUrl = payload["signal"];
+
+    await signal.connect(signalUrl!, groupId!);
+
+    webrtc = WebRTCService(signal);
+    await webrtc!.initAsCaller();
+
+    locationService = LocationService(webrtc!);
+    await locationService!.start();
+
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    final familyId = FamilyService.familyId;
-    final members = FamilyService.getMembers();
+    if (groupId == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text("FamilyCompass")),
+        body: Center(
+          child: ElevatedButton(
+            onPressed: _joinFamily,
+            child: const Text("扫码加入家庭"),
+          ),
+        ),
+      );
+    }
 
-    return Scaffold(
-      appBar: AppBar(title: const Text("家庭")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: familyId == null
-            ? buildNoFamilyUI()
-            : buildFamilyUI(familyId, members),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("FamilyCompass"),
+          bottom: const TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.map), text: "地图"),
+              Tab(icon: Icon(Icons.chat), text: "聊天"),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            const MapPage(),
+            ChatPage(webrtc: webrtc!),
+          ],
+        ),
       ),
     );
   }
-
-  // 未加入家庭时的 UI
-  Widget buildNoFamilyUI() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("你的名字：", style: TextStyle(fontSize: 16)),
-        TextField(controller: _nameController),
-
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            if (_nameController.text.isNotEmpty) {
-              setState(() {
-                FamilyService.createFamily(_nameController.text);
-              });
-            }
-          },
-          child: const Text("创建家庭"),
-        ),
-
-        const SizedBox(height: 40),
-        const Text("加入家庭：", style: TextStyle(fontSize: 16)),
-        TextField(
-          controller: _joinController,
-          decoration: const InputDecoration(hintText: "输入家庭ID"),
-        ),
-
-        const SizedBox(height: 20),
-        ElevatedButton(
-          onPressed: () {
-            if (_nameController.text.isNotEmpty &&
-                _joinController.text.isNotEmpty) {
-              setState(() {
-                FamilyService.joinFamily(
-                    _joinController.text, _nameController.text);
-              });
-            }
-          },
-          child: const Text("加入家庭"),
-        ),
-      ],
-    );
-  }
-
+}
