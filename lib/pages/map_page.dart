@@ -1,7 +1,8 @@
 // lib/pages/map_page.dart
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:amap_flutter_map/amap_flutter_map.dart';
 import '../services/storage_service.dart';
 
 class MapPage extends StatefulWidget {
@@ -12,60 +13,58 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  final Completer<GoogleMapController> _controller = Completer();
   Map<String, dynamic> _locations = {};
-  Set<Marker> _markers = {};
+  String? _amapKey;
 
   @override
   void initState() {
     super.initState();
-    _loadLocations();
+    _load();
   }
 
-  Future<void> _loadLocations() async {
+  Future<void> _load() async {
     _locations = await StorageService.getLocations();
-    _buildMarkers();
-  }
-
-  void _buildMarkers() {
-    final markers = <Marker>{};
-
-    _locations.forEach((key, value) {
-      final lat = value["lat"] as double;
-      final lng = value["lng"] as double;
-      final battery = (value["battery"] * 100).toInt();
-      final ts = DateTime.fromMillisecondsSinceEpoch(value["timestamp"]);
-
-      markers.add(
-        Marker(
-          markerId: MarkerId(key),
-          position: LatLng(lat, lng),
-          infoWindow: InfoWindow(
-            title: key == "self" ? "我" : key,
-            snippet: "电量: $battery%  时间: $ts",
-          ),
-        ),
-      );
-    });
-
-    setState(() {
-      _markers = markers;
-    });
+    _amapKey = await StorageService.getAmapKey(); // 用户是否填了高德 key
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final initial = _locations["self"];
-    final center = initial != null
-        ? LatLng(initial["lat"], initial["lng"])
-        : const LatLng(35.6895, 139.6917);
+    final self = _locations["self"];
+    final center = self != null
+        ? LatLng(self["lat"], self["lng"])
+        : const LatLng(39.909187, 116.397451);
 
+    // 如果用户填了高德 key → 用高德地图
+    if (_amapKey != null && _amapKey!.isNotEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text("家庭地图（高德）")),
+        body: AMapWidget(
+          apiKey: AMapApiKey(
+            androidKey: _amapKey!,
+            iosKey: _amapKey!,
+          ),
+          initialCameraPosition: CameraPosition(
+            target: LatLng(center.latitude, center.longitude),
+            zoom: 14,
+          ),
+        ),
+      );
+    }
+
+    // 默认：OSM 免费地图
     return Scaffold(
-      appBar: AppBar(title: const Text("家庭地图")),
-      body: GoogleMap(
-        initialCameraPosition: CameraPosition(target: center, zoom: 12),
-        markers: _markers,
-        onMapCreated: (c) => _controller.complete(c),
+      appBar: AppBar(title: const Text("家庭地图（免费）")),
+      body: FlutterMap(
+        options: MapOptions(
+          initialCenter: center,
+          initialZoom: 14,
+        ),
+        children: [
+          TileLayer(
+            urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          ),
+        ],
       ),
     );
   }
