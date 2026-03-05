@@ -17,6 +17,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.0'
+          cache: false   # ← 关键：禁用缓存，强制重新下载依赖
 
       - name: Install dependencies
         run: flutter pub get
