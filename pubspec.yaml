@@ -12,13 +12,35 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # 扫码
+  mobile_scanner: ^3.5.0
+
+  # 二维码生成（如果你需要）
+  qr_flutter: ^4.1.0
+
+  # WebRTC
+  flutter_webrtc: ^0.9.48
+
+  # 本地存储
+  shared_preferences: ^2.2.2
+
+  # OSM 免费地图
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+
+  # 高德地图（可选）
+  amap_flutter_map: ^3.0.0
+  amap_flutter_location: ^3.0.0
+
+  # 电量
+  battery_plus: ^5.0.2
+
+  # 位置
+  geolocator: ^10.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
 flutter:
   uses-material-design: true
-
-dependencies:
-  qr_flutter: ^4.1.0
-  mobile_scanner: ^3.5.0
