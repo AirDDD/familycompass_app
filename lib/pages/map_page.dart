@@ -1,8 +1,9 @@
-// lib/pages/map_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:amap_flutter_map/amap_flutter_map.dart';
+import 'package:latlong2/latlong.dart' as osm;
+import 'package:amap_flutter_map/amap_flutter_map.dart' as amap;
+import 'package:amap_flutter_base/amap_flutter_base.dart' as amap_base;
+
 import '../services/storage_service.dart';
 
 class MapPage extends StatefulWidget {
@@ -30,39 +31,38 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    final self = _locations["self"];
-    final center = self != null
-        ? LatLng(self["lat"], self["lng"])
-        : const LatLng(39.909187, 116.397451);
+    // 默认中心点
+    final center = osm.LatLng(39.909187, 116.397451);
 
-    // 如果用户填了高德 key → 用高德地图
+    // 如果用户填了高德 Key → 使用高德地图
     if (_amapKey != null && _amapKey!.isNotEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text("家庭地图（高德）")),
-        body: AMapWidget(
-          apiKey: AMapApiKey(
+        appBar: AppBar(title: const Text("家庭位置（高德）")),
+        body: amap.AMapWidget(
+          apiKey: amap_base.AMapApiKeyConfig(
             androidKey: _amapKey!,
             iosKey: _amapKey!,
           ),
-          initialCameraPosition: CameraPosition(
-            target: LatLng(center.latitude, center.longitude),
-            zoom: 14,
+          initialCameraPosition: amap.CameraPosition(
+            target: amap_base.LatLng(center.latitude, center.longitude),
+            zoom: 12,
           ),
         ),
       );
     }
 
-    // 默认：OSM 免费地图
+    // 否则使用 OSM 免费地图
     return Scaffold(
-      appBar: AppBar(title: const Text("家庭地图（免费）")),
+      appBar: AppBar(title: const Text("家庭位置（OSM）")),
       body: FlutterMap(
         options: MapOptions(
           initialCenter: center,
-          initialZoom: 14,
+          initialZoom: 12,
         ),
         children: [
           TileLayer(
             urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+            userAgentPackageName: "com.example.familycompass_app",
           ),
         ],
       ),
