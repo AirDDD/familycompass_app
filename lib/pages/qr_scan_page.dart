@@ -1,6 +1,7 @@
+// lib/pages/qr_scan_page.dart
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import '../services/family_service.dart';
+import 'dart:convert';
 
 class QrScanPage extends StatefulWidget {
   const QrScanPage({super.key});
@@ -10,7 +11,7 @@ class QrScanPage extends StatefulWidget {
 }
 
 class _QrScanPageState extends State<QrScanPage> {
-  bool _handled = false;
+  bool handled = false;
 
   @override
   Widget build(BuildContext context) {
@@ -18,15 +19,16 @@ class _QrScanPageState extends State<QrScanPage> {
       appBar: AppBar(title: const Text("扫码加入家庭")),
       body: MobileScanner(
         onDetect: (capture) {
-          if (_handled) return;
-          _handled = true;
+          if (handled) return;
+          handled = true;
 
-          final barcode = capture.barcodes.first;
-          final code = barcode.rawValue;
+          final raw = capture.barcodes.first.rawValue;
+          if (raw == null) return;
 
-          if (code != null && code.length == 6) {
-            Navigator.pop(context, code);
-          } else {
+          try {
+            final payload = jsonDecode(raw);
+            Navigator.pop(context, payload);
+          } catch (_) {
             Navigator.pop(context, null);
           }
         },
