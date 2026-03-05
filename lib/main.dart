@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'pages/home_page.dart';
+import 'pages/map_page.dart';
+import 'pages/family_page.dart';
+import 'pages/settings_page.dart';
 
 void main() {
   runApp(const FamilyCompassApp());
@@ -12,29 +16,58 @@ class FamilyCompassApp extends StatelessWidget {
     return MaterialApp(
       title: 'FamilyCompass',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
+        primarySwatch: Colors.green,
+        scaffoldBackgroundColor: Colors.white,
       ),
-      home: const HomePage(),
+      home: const MainNavigation(),
     );
   }
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class MainNavigation extends StatefulWidget {
+  const MainNavigation({super.key});
+
+  @override
+  State<MainNavigation> createState() => _MainNavigationState();
+}
+
+class _MainNavigationState extends State<MainNavigation> {
+  int _index = 0;
+
+  final List<Widget> _pages = const [
+    HomePage(),
+    MapPage(),
+    FamilyPage(),
+    SettingsPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FamilyCompass Demo'),
-      ),
-      body: const Center(
-        child: Text(
-          '这是一个最小可打包的 Flutter App。\n'
-          '后面我们会在这里接入你的 WebRTC / 聊天 / 服务器地址输入。',
-          textAlign: TextAlign.center,
-        ),
+      body: _pages[_index],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _index,
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey,
+        onTap: (i) => setState(() => _index = i),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: "首页",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            label: "地图",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.group),
+            label: "家庭",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: "设置",
+          ),
+        ],
       ),
     );
   }
