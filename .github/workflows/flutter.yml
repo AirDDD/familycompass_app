@@ -1,4 +1,5 @@
 name: Build Flutter APK
+run: rm -rf ~/.pub-cache
 
 on:
   push:
