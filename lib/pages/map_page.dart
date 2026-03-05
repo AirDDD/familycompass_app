@@ -31,7 +31,7 @@ class _MapPageState extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    // 默认中心点
+    // 默认中心点（北京天安门）
     final center = osm.LatLng(39.909187, 116.397451);
 
     // 如果用户填了高德 Key → 使用高德地图
