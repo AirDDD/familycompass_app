@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+
   # 扫码
   mobile_scanner: ^3.5.0
 
@@ -45,3 +46,4 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
