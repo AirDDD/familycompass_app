@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/family_service.dart';
+import 'qr_generate_page.dart';
+import 'qr_scan_page.dart';
 
 class FamilyPage extends StatefulWidget {
   const FamilyPage({super.key});
@@ -28,6 +30,7 @@ class _FamilyPageState extends State<FamilyPage> {
     );
   }
 
+  // 未加入家庭时的 UI
   Widget buildNoFamilyUI() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,19 +74,3 @@ class _FamilyPageState extends State<FamilyPage> {
     );
   }
 
-  Widget buildFamilyUI(String familyId, List<String> members) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("家庭ID：$familyId",
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-
-        const SizedBox(height: 20),
-        const Text("家庭成员：", style: TextStyle(fontSize: 18)),
-
-        const SizedBox(height: 10),
-        ...members.map((m) => Text("- $m", style: const TextStyle(fontSize: 16))),
-      ],
-    );
-  }
-}
